@@ -67,13 +67,14 @@ public class NetPaint extends JFrame {
         ConnectionManager.getInstance().addMessageListener(Protocol.MessageCodes.RESPONSE_DESK_UNJOIN, new MessageListener() {
             @Override
             public void messageReceived(Message m) {
-                statusLabelDeskJoined.setText("Unjoined!");
-                joinedDeskName = null;
-                share.setEnabled(true);
-                join.setEnabled(true);
-                unjoin.setEnabled(false);
-                unshare.setEnabled(false);
-
+                SwingUtilities.invokeLater(() -> {
+                    statusLabelDeskJoined.setText("Unjoined!");
+                    joinedDeskName = null;
+                    share.setEnabled(true);
+                    join.setEnabled(true);
+                    unjoin.setEnabled(false);
+                    unshare.setEnabled(false);
+                });
             }
         });
 

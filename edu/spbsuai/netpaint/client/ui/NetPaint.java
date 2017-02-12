@@ -80,32 +80,29 @@ public class NetPaint extends JFrame {
         ConnectionManager.getInstance().addMessageListener(Protocol.MessageCodes.RESPONSE_DESK_PAINT, new MessageListener() {
             @Override
             public void messageReceived(Message m) {
-                System.out.println("img update from server !!! " + m.getParamByIndex(0));
-                pp.setImage((BufferedImage) m.getParamByIndex(1));
+                SwingUtilities.invokeLater(() -> {
+                    pp.setImage((BufferedImage) m.getParamByIndex(1));
+                });
             }
         });
-        pp.addPropertyChangeListener("image", new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                System.out.println("image changed!!");
-                if (ConnectionManager.getInstance().isConnected()) {
-                    if (sharedByName != null) {
-                        try {
-                            ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(sharedByName, (BufferedImage) evt.getNewValue()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (joinedDeskName != null) {
-                        try {
-                            ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(joinedDeskName, (BufferedImage) evt.getNewValue()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+        pp.addPropertyChangeListener("image", evt -> {
+            if (ConnectionManager.getInstance().isConnected()) {
+                if (sharedByName != null) {
+                    try {
+                        ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(sharedByName, (BufferedImage) evt.getNewValue()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
-
+                if (joinedDeskName != null) {
+                    try {
+                        ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(joinedDeskName, (BufferedImage) evt.getNewValue()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+
         });
 
     }
@@ -284,7 +281,7 @@ public class NetPaint extends JFrame {
                 loginDlg.setVisible(true);
                 // if logon successfully
                 if (loginDlg.isSucceeded()) {
-                    statusLabelConnection.setText("Connected");
+                    statusLabelConnection.setText("Connected as " + loginDlg.getUsername());
                 } else {
                     statusLabelConnection.setText("Not connected");
                 }
@@ -343,11 +340,9 @@ public class NetPaint extends JFrame {
             regDlg.setVisible(true);
             if (regDlg.isSucceeded()) {
                 statusLabelConnection.setText("Connected as " + regDlg.getUsername());
-            } else {
-                statusLabelConnection.setText("Not connected");
             }
         });
-        connectionSettingsMenu.addActionListener(e->{
+        connectionSettingsMenu.addActionListener(e -> {
             ConnectionSettingsDialog c = new ConnectionSettingsDialog(NetPaint.this);
             c.setVisible(true);
         });

@@ -56,7 +56,7 @@ public class RegisterDialog extends JDialog {
         panel.add(pfPassword, cs);
 
 
-        btnLogin = new JButton("Register");
+        btnLogin = new JButton("Register and login");
 
         btnLogin.addActionListener(e -> {
             RegisterTask ct = new RegisterTask(tfUsername.getText(), new String(pfPassword.getPassword()));

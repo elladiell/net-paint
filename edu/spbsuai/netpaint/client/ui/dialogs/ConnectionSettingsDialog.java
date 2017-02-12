@@ -64,6 +64,7 @@ public class ConnectionSettingsDialog extends JDialog {
         btnLogin.addActionListener(e -> {
             ConnectionManager.setServerName(serverName.getText());
             ConnectionManager.setPort((Integer) portSpinner.getValue());
+            dispose();
         });
         btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(new ActionListener() {

@@ -1,10 +1,8 @@
 package edu.spbsuai.netpaint.server;
 
 import edu.spbsuai.netpaint.protocol.Message;
-import edu.spbsuai.netpaint.protocol.NetPaintProtocolException;
 import edu.spbsuai.netpaint.protocol.Protocol;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,14 +57,32 @@ public class NetPaintServer implements Runnable {
             case REQ_LOGIN: {
                 byte[] resp;
                 try {
-                    boolean added = UserManager.addConnectedUser((String) m.getParamByIndex(0), (String) m.getParamByIndex(1), csocket);
+                    String login = (String) m.getParamByIndex(0);
+                    boolean added = UserManager.addConnectedUser(login, (String) m.getParamByIndex(1), csocket);
                     if (added) {
-                        resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_LOGIN, Protocol.ResponseStatuses.OK, "User is connected");
+                        resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_LOGIN, Protocol.ResponseStatuses.OK, "User " + login + "is connected");
                     } else {
                         resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_LOGIN, Protocol.ResponseStatuses.ERROR, "Authetication failed. Wrong login or password.");
                     }
                 }catch(UserManager.UserManagerException e){
                     resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_LOGIN, Protocol.ResponseStatuses.ERROR, e.getMessage());
+                }
+                os.write(resp);
+                os.flush();
+                break;
+            }
+            case REQ_REGISTER: {
+                byte[] resp;
+                try {
+                    String  login = (String) m.getParamByIndex(0);
+                    boolean added = UserManager.registerUser(login, (String) m.getParamByIndex(1), csocket);
+                    if (added) {
+                        resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_REGISTER, Protocol.ResponseStatuses.OK, "User " + login + " is registered and connected");
+                    } else {
+                        resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_REGISTER, Protocol.ResponseStatuses.ERROR, "Registration failed");
+                    }
+                }catch(UserManager.UserManagerException e){
+                    resp = Protocol.buildResponse(Protocol.MessageCodes.RESPONSE_REGISTER, Protocol.ResponseStatuses.ERROR, e.getMessage());
                 }
                 os.write(resp);
                 os.flush();

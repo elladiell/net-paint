@@ -1,13 +1,11 @@
 package edu.spbsuai.netpaint.client.ui.dialogs;
 
-import edu.spbsuai.netpaint.client.ui.net.Autentificator;
 import edu.spbsuai.netpaint.client.ui.net.ConnectionManager;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.concurrent.ExecutionException;
 import javax.swing.*;
-import javax.swing.border.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class LoginDialog extends JDialog {
 
@@ -23,11 +21,9 @@ public class LoginDialog extends JDialog {
 
     String defaultLogin = "guest";
     String defaultPassword = "guest";
-    private Autentificator autentificator;
 
-    public LoginDialog(Frame parent, Autentificator autentificator) {
+    public LoginDialog(Frame parent) {
         super(parent, "Login", true);
-        this.autentificator = autentificator;
         //
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();

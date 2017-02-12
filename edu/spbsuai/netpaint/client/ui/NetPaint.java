@@ -16,9 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import edu.spbsuai.netpaint.client.ui.dialogs.DeskJoinDialog;
-import edu.spbsuai.netpaint.client.ui.dialogs.DeskShareDialog;
-import edu.spbsuai.netpaint.client.ui.dialogs.LoginDialog;
+import edu.spbsuai.netpaint.client.ui.dialogs.*;
 import edu.spbsuai.netpaint.client.ui.layouts.ModifiedFlowLayout;
 import edu.spbsuai.netpaint.client.ui.net.ConnectionManager;
 import edu.spbsuai.netpaint.client.ui.net.MessageListener;
@@ -41,6 +39,8 @@ public class NetPaint extends JFrame {
     private JLabel statusLabelDeskJoined = new JLabel("Not joined");
 
 
+    private JMenuItem connectionSettingsMenu = new JMenuItem("Connection settings");
+    private JMenuItem register = new JMenuItem("Register");
     private JMenuItem share = new JMenuItem("Share");
     private JMenuItem unshare = new JMenuItem("Unshare");
     private JMenuItem join = new JMenuItem("Join");
@@ -88,15 +88,15 @@ public class NetPaint extends JFrame {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 System.out.println("image changed!!");
-                if(ConnectionManager.getInstance().isConnected()){
-                    if(sharedByName != null){
+                if (ConnectionManager.getInstance().isConnected()) {
+                    if (sharedByName != null) {
                         try {
                             ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(sharedByName, (BufferedImage) evt.getNewValue()));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
-                    if(joinedDeskName != null){
+                    if (joinedDeskName != null) {
                         try {
                             ConnectionManager.getInstance().sendMessage(Protocol.buildRequestPaint(joinedDeskName, (BufferedImage) evt.getNewValue()));
                         } catch (IOException e) {
@@ -211,11 +211,11 @@ public class NetPaint extends JFrame {
                 KeyEvent.VK_H, ActionEvent.CTRL_MASK));
         share.addActionListener(e -> {
             if (!ConnectionManager.getInstance().isConnected()) {
-                LoginDialog loginDlg = new LoginDialog(NetPaint.this, ConnectionManager.getInstance());
+                LoginDialog loginDlg = new LoginDialog(NetPaint.this);
                 loginDlg.setVisible(true);
                 // if logon successfully
                 if (loginDlg.isSucceeded()) {
-                    statusLabelConnection.setText("Connected");
+                    statusLabelConnection.setText("Connected as " + loginDlg.getUsername());
                 } else {
                     statusLabelConnection.setText("Not connected");
                 }
@@ -280,7 +280,7 @@ public class NetPaint extends JFrame {
                 KeyEvent.VK_J, ActionEvent.CTRL_MASK));
         join.addActionListener(e -> {
             if (!ConnectionManager.getInstance().isConnected()) {
-                LoginDialog loginDlg = new LoginDialog(NetPaint.this, ConnectionManager.getInstance());
+                LoginDialog loginDlg = new LoginDialog(NetPaint.this);
                 loginDlg.setVisible(true);
                 // if logon successfully
                 if (loginDlg.isSucceeded()) {
@@ -337,6 +337,22 @@ public class NetPaint extends JFrame {
             }.execute();
 
         });
+
+        register.addActionListener(e -> {
+            RegisterDialog regDlg = new RegisterDialog(NetPaint.this);
+            regDlg.setVisible(true);
+            if (regDlg.isSucceeded()) {
+                statusLabelConnection.setText("Connected as " + regDlg.getUsername());
+            } else {
+                statusLabelConnection.setText("Not connected");
+            }
+        });
+        connectionSettingsMenu.addActionListener(e->{
+            ConnectionSettingsDialog c = new ConnectionSettingsDialog(NetPaint.this);
+            c.setVisible(true);
+        });
+        m2.add(connectionSettingsMenu);
+        m2.add(register);
         m2.add(share);
         m2.add(unshare);
         m2.add(join);

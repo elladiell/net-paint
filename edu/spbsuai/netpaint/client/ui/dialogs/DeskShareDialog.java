@@ -1,6 +1,5 @@
 package edu.spbsuai.netpaint.client.ui.dialogs;
 
-import edu.spbsuai.netpaint.client.ui.net.Autentificator;
 import edu.spbsuai.netpaint.client.ui.net.ConnectionManager;
 import edu.spbsuai.netpaint.protocol.Message;
 import edu.spbsuai.netpaint.protocol.Protocol;

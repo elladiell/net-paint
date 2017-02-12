@@ -1,32 +1,15 @@
 package edu.spbsuai.netpaint.protocol;
 
-import edu.spbsuai.netpaint.server.User;
-
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
 
 public class Protocol {
-//    public static RequestMessage parseRequest(InputStream is, User user) throws IOException, NetPaintProtocolException {
-//        ProtocolDataInputStream dis = new ProtocolDataInputStream(is);
-//        MessageCodes requestCode = MessageCodes.values()[dis.readInt()];
-//        switch (requestCode){
-//            case REQ_DESK_JOIN:
-//                String deskName = dis.readString();
-//                return new RequestJoinDesk(deskName);
-//            default:
-//                throw new NetPaintProtocolException();
-//        }
-//
-//    }
-
-
     public static final int SERVER_PORT = 3421;
 
-
     public enum MessageCodes {
-        REQ_LOGIN, REQ_DESK_SHARE, REQ_DESK_UNSHARE, REQ_DESK_JOIN, REQ_DESK_UNJOIN, REQ_DESKS_LIST, REQ_DESK_PAINT,
-        RESPONSE_LOGIN, RESPONSE_DESK_SHARE, RESPONSE_DESK_UNSHARE, RESPONSE_DESK_JOIN, RESPONSE_DESK_UNJOIN, RESPONSE_DESKS_LIST, RESPONSE_DESK_PAINT
+        REQ_LOGIN, REQ_REGISTER, REQ_DESK_SHARE, REQ_DESK_UNSHARE, REQ_DESK_JOIN, REQ_DESK_UNJOIN, REQ_DESKS_LIST, REQ_DESK_PAINT,
+        RESPONSE_LOGIN, RESPONSE_REGISTER, RESPONSE_DESK_SHARE, RESPONSE_DESK_UNSHARE, RESPONSE_DESK_JOIN, RESPONSE_DESK_UNJOIN, RESPONSE_DESKS_LIST, RESPONSE_DESK_PAINT
     }
 
     public enum ResponseStatuses {OK, ERROR}
@@ -49,6 +32,7 @@ public class Protocol {
                 msg.addParam(deskName);
                 break;
             }
+            case REQ_REGISTER:
             case REQ_LOGIN: {
                 String login = dis.readString();
                 msg.addParam(login);
@@ -60,7 +44,8 @@ public class Protocol {
             case RESPONSE_DESK_UNJOIN:
             case RESPONSE_DESK_SHARE:
             case RESPONSE_DESK_JOIN:
-            case RESPONSE_LOGIN: {
+            case RESPONSE_LOGIN:
+            case RESPONSE_REGISTER:{
                 int respCode = dis.readInt();
                 msg.addParam(respCode);
                 String comment = dis.readString();
@@ -98,14 +83,19 @@ public class Protocol {
         return msg;
     }
 
-    public static void writeMessage(byte[] message, OutputStream os) throws IOException {
-        os.write(message);
-        os.flush();
-    }
 
     public static byte[] buildRequestLogin(String login, String password) throws IOException {
         try (ProtocolByteArrayOutputStream baos = new ProtocolByteArrayOutputStream()) {
             baos.writeInt(MessageCodes.REQ_LOGIN.ordinal());
+            baos.writeString(login, ENCODING);
+            baos.writeString(password, ENCODING);
+            return baos.toByteArray();
+        }
+    }
+
+    public static byte[] buildRequestRegister(String login, String password) throws IOException {
+        try (ProtocolByteArrayOutputStream baos = new ProtocolByteArrayOutputStream()) {
+            baos.writeInt(MessageCodes.REQ_REGISTER.ordinal());
             baos.writeString(login, ENCODING);
             baos.writeString(password, ENCODING);
             return baos.toByteArray();

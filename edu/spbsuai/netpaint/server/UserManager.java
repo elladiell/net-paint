@@ -39,6 +39,18 @@ public class UserManager {
         return userMap.get(csocket);
     }
 
+    public static boolean registerUser(String login, String password, Socket socket) throws UserManagerException {
+        if(userPasswords.containsKey(login)) {
+            throw new UserManagerException("User with such login is already exists");
+        }
+        if(login.isEmpty()) throw new UserManagerException("Login must not be empty!");
+        if(password.isEmpty()) throw new UserManagerException("Password must not be empty!");
+        userPasswords.put(login,password);
+        User u = new User(login, socket);
+        userMap.put(socket, u);
+        return true;
+    }
+
     public  static class UserManagerException extends Throwable {
         public UserManagerException(String s) {
             super(s);

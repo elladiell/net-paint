@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class ConnectionManager implements Autentificator {
+public class ConnectionManager {
 
 
     private String connectionStatusMessage;
@@ -29,6 +29,20 @@ public class ConnectionManager implements Autentificator {
 
     private Map<Protocol.MessageCodes, Message> respMessages = Collections.synchronizedMap(new HashMap<>());
     private Map<Protocol.MessageCodes, List<MessageListener>> messageListeners = Collections.synchronizedMap(new HashMap<>());
+
+
+    public static void setServerName(String sn){
+        serverName = sn;
+    }
+    public static void setPort(int p){
+        serverPort = p;
+    }
+    public static String getServerName(){
+        return serverName;
+    }
+    public static int getPort(){
+        return serverPort;
+    }
 
     public void addMessageListener(Protocol.MessageCodes code, MessageListener ml) {
         List<MessageListener> listeners = messageListeners.get(code);
@@ -95,26 +109,48 @@ public class ConnectionManager implements Autentificator {
         return connected;
     }
 
-    public void doConnect() throws IOException {
-        doConnect("guest", "guest");
-    }
-
     public String getConnectionStatusMessage() {
         return connectionStatusMessage;
     }
 
     private BlockingDeque<byte[]> messageQueueToServer = new LinkedBlockingDeque<>();
 
-    @Override
     public boolean doConnect(String username, String password) throws IOException {
         try {
-            socket = new Socket(serverName, serverPort);
-            new Thread(socketWriter).start();
-            new Thread(socketReader).start();
+
+            initSocketAndThreads();
             byte[] message = Protocol.buildRequestLogin(username, password);
 
             sendMessage(message);
             Message response = receiveMessage(Protocol.MessageCodes.RESPONSE_LOGIN);
+            int okOrError = (Integer) response.getParamByIndex(0);
+            connectionStatusMessage = (String) response.getParamByIndex(1);
+            if (Protocol.ResponseStatuses.values()[okOrError] == Protocol.ResponseStatuses.OK) {
+                connected = true;
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    private void initSocketAndThreads() throws IOException {
+        if(socket == null) {
+            socket = new Socket(serverName, serverPort);
+            new Thread(socketWriter).start();
+            new Thread(socketReader).start();
+        }
+    }
+
+
+    public boolean doRegister(String username, String password) throws IOException {
+        try {
+            initSocketAndThreads();
+            byte[] message = Protocol.buildRequestRegister(username, password);
+
+            sendMessage(message);
+            Message response = receiveMessage(Protocol.MessageCodes.RESPONSE_REGISTER);
             int okOrError = (Integer) response.getParamByIndex(0);
             connectionStatusMessage = (String) response.getParamByIndex(1);
             if (Protocol.ResponseStatuses.values()[okOrError] == Protocol.ResponseStatuses.OK) {

@@ -1,0 +1,52 @@
+<project name="NetPaint" basedir="." default="main">
+
+    <property name="src.dir"     value="src"/>
+
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
+
+    <property name="main-class-client"  value="edu.spbsuai.netpaint.client.ui.NetPaint"/>
+    <property name="main-class-server"  value="edu.spbsuai.netpaint.server.NetPaintServer"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
+    </target>
+
+    <target name="client-jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class-client}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="server-jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}Server.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class-server}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
+    <target name="run-server" depends="server-jar">
+        <java jar="${jar.dir}/${ant.project.name}Server.jar" fork="true"/>
+    </target>
+
+    <target name="run-client" depends="client-jar">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+
+    <target name="clean-build" depends="clean,client-jar, server-jar"/>
+
+    <target name="main" depends="clean,run-client"/>
+</project>
